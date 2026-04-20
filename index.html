@@ -95,7 +95,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .cal-today-btn:hover{background:var(--surface2)}
 
 /* ── Chart ── */
-.chart-wrap{height:180px;margin-bottom:6px}
+.chart-wrap{height:240px;margin-bottom:6px}
 .xlabels{display:flex;justify-content:space-between}
 .xl{font-size:10px;color:var(--text3)}
 
@@ -603,6 +603,19 @@ function initMap(){
     attribution:'© OpenStreetMap © CartoDB', maxZoom:19, subdomains:'abcd'
   }).addTo(leafMap);
 
+  renderMapMarkers();
+
+  // แก้ปัญหา Leaflet render ไม่เต็ม container
+  setTimeout(()=>leafMap.invalidateSize(), 200);
+}
+
+// แยกออกมาเพื่อเรียกซ้ำได้เมื่อข้อมูลสถานีอัปเดต
+function renderMapMarkers(){
+  if(!leafMap) return;
+  // ลบ marker เดิมก่อน
+  Object.values(markerRefs).forEach(m=>leafMap.removeLayer(m));
+  markerRefs={};
+
   SENSORS.forEach(s=>{
     const col=lvColor(s.level);
     const icon=L.divIcon({html:'<div style="width:20px;height:20px;border-radius:50%;background:'+col+';border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>',className:'',iconSize:[20,20],iconAnchor:[10,10]});
@@ -612,10 +625,12 @@ function initMap(){
     markerRefs[s.id]=m;
   });
 
-  document.getElementById('sensor-list').innerHTML=SENSORS.map(s=>{
-    const [bc,bt]=lvBadge(s.level);
-    return '<div class="sensor-row" onclick="flyTo('+s.id+')"><div class="dot" style="background:'+lvColor(s.level)+'"></div><span class="sname">'+s.name+'</span><span class="scm">'+s.level.toFixed(1)+' cm</span><span class="badge badge-'+bc+'">'+bt+'</span></div>';
-  }).join('');
+  document.getElementById('sensor-list').innerHTML = SENSORS.length === 0
+    ? '<div class="empty">ไม่มีข้อมูลสถานี</div>'
+    : SENSORS.map(s=>{
+        const [bc,bt]=lvBadge(s.level);
+        return '<div class="sensor-row" onclick="flyTo('+s.id+')"><div class="dot" style="background:'+lvColor(s.level)+'"></div><span class="sname">'+s.name+'</span><span class="scm">'+s.level.toFixed(1)+' cm</span><span class="badge badge-'+bc+'">'+bt+'</span></div>';
+      }).join('');
 
   // ถ้ามีสถานีจริง ให้ zoom ไปที่สถานีแรก
   if(SENSORS.length){
@@ -723,15 +738,18 @@ async function initDashboard(){
   renderCalGrid();
   // โหลดกราฟรายเดือนหลังจาก main data โหลดเสร็จแล้ว
   setTimeout(loadMonthlyChart, 800);
-  // สร้างแผนที่หลังจาก SENSORS โหลดเสร็จ
-  if(SENSORS.length) initMap();
+  // สร้างแผนที่เสมอ (แม้ SENSORS จะยังว่างก็แสดงแผนที่ไทยได้)
+  initMap();
 
   // รีเฟรชข้อมูลสถานีทุก 10 นาที
   setInterval(async()=>{
     try{
       const res  = await fetch(`${SCRIPT_URL}?action=get_data`);
       const data = await res.json();
-      if(Array.isArray(data) && data.length) SENSORS = data;
+      if(Array.isArray(data) && data.length){
+        SENSORS = data;
+        renderMapMarkers(); // อัปเดต marker บนแผนที่ด้วย
+      }
       if(dayOffset===0) await loadAndRender();
     }catch(e){}
   }, 10*60*1000);
