@@ -219,7 +219,7 @@ select:focus{outline:none;border-color:var(--blue)}
 
 
   <!-- Monthly chart -->
-  <div class="card" id="monthly-card" style="display:none">
+  <div class="card" id="monthly-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div class="card-title" style="margin-bottom:0">กราฟรายเดือน</div>
       <div style="display:flex;gap:6px;align-items:center">
@@ -592,21 +592,34 @@ function showLoading(on){
 let leafMap=null, markerRefs={};
 
 function initMap(){
+  // รอ Leaflet script โหลดเสร็จก่อน
+  if(typeof L === 'undefined'){
+    console.log('[FLOOD.IO] รอ Leaflet โหลด...');
+    setTimeout(initMap, 150);
+    return;
+  }
   if(leafMap) return;
-  leafMap=L.map('map',{
-    minZoom:6, maxZoom:19,
-    maxBounds:[[5.5,97.3],[20.5,105.7]], // จำกัดขอบเขตแค่ประเทศไทย
-    maxBoundsViscosity:0.8
-  }).setView([13.0,100.5],6);
-  // ใช้ CartoDB tile แสดงชื่อเป็นภาษาอังกฤษ อ่านง่าย
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
-    attribution:'© OpenStreetMap © CartoDB', maxZoom:19, subdomains:'abcd'
-  }).addTo(leafMap);
 
-  renderMapMarkers();
+  try {
+    leafMap=L.map('map',{
+      minZoom:6, maxZoom:19,
+      maxBounds:[[5.5,97.3],[20.5,105.7]], // จำกัดขอบเขตแค่ประเทศไทย
+      maxBoundsViscosity:0.8
+    }).setView([13.0,100.5],6);
+    // ใช้ CartoDB tile แสดงชื่อเป็นภาษาอังกฤษ อ่านง่าย
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+      attribution:'© OpenStreetMap © CartoDB', maxZoom:19, subdomains:'abcd'
+    }).addTo(leafMap);
 
-  // แก้ปัญหา Leaflet render ไม่เต็ม container
-  setTimeout(()=>leafMap.invalidateSize(), 200);
+    renderMapMarkers();
+
+    // แก้ปัญหา Leaflet render ไม่เต็ม container — เรียกหลายครั้งเผื่อ layout settle ช้า
+    [100, 400, 900, 1800].forEach(ms=>{
+      setTimeout(()=>{ try{ leafMap.invalidateSize(); }catch(e){} }, ms);
+    });
+  } catch(e) {
+    console.error('[FLOOD.IO] สร้างแผนที่ไม่สำเร็จ:', e);
+  }
 }
 
 // แยกออกมาเพื่อเรียกซ้ำได้เมื่อข้อมูลสถานีอัปเดต
@@ -671,7 +684,6 @@ async function loadMonthlyChart(){
 
   const thaiMonFull=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   document.getElementById('monthly-label').textContent=`${thaiMonFull[monthlyMonth]} ${yy+543}`;
-  document.getElementById('monthly-card').style.display='block';
 
   const daysInMonth = new Date(yy, monthlyMonth+1, 0).getDate();
   const dayMaxes  = new Array(daysInMonth).fill(null);
@@ -717,6 +729,9 @@ async function loadMonthlyChart(){
 
 /* ══ INIT ══ */
 async function initDashboard(){
+  // เริ่มสร้างแผนที่ก่อนเลย — ไม่ต้องรอข้อมูลจาก Apps Script
+  initMap();
+
   // โหลดข้อมูลสถานีทั้งหมดจาก Apps Script
   try {
     const res  = await fetch(`${SCRIPT_URL}?action=get_data`);
@@ -728,6 +743,8 @@ async function initDashboard(){
       sel.innerHTML = SENSORS.map((s,i)=>`<option value="${i}">${s.name} (ID ${s.id})</option>`).join('');
       // โหลด LEVELS จากสถานีแรก
       updateLevels(0);
+      // อัปเดต markers บนแผนที่ที่สร้างไว้แล้ว
+      renderMapMarkers();
     }
   } catch(e) {
     console.warn('โหลดข้อมูลสถานีไม่สำเร็จ:', e);
@@ -738,8 +755,6 @@ async function initDashboard(){
   renderCalGrid();
   // โหลดกราฟรายเดือนหลังจาก main data โหลดเสร็จแล้ว
   setTimeout(loadMonthlyChart, 800);
-  // สร้างแผนที่เสมอ (แม้ SENSORS จะยังว่างก็แสดงแผนที่ไทยได้)
-  initMap();
 
   // รีเฟรชข้อมูลสถานีทุก 10 นาที
   setInterval(async()=>{
@@ -754,6 +769,13 @@ async function initDashboard(){
     }catch(e){}
   }, 10*60*1000);
 }
+
+// เรียก invalidateSize อีกรอบหลัง page โหลดเสร็จทั้งหมด (กัน tile ไม่แสดง)
+window.addEventListener('load', ()=>{
+  if(leafMap){
+    setTimeout(()=>{ try{ leafMap.invalidateSize(); }catch(e){} }, 300);
+  }
+});
 
 initDashboard();
 </script>
