@@ -25,18 +25,14 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 /* ── Top Bar ── */
 .topnav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:0;height:52px}
 .nav-brand{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--blue);margin-right:20px;white-space:nowrap}
-.nav-tabs{display:flex;height:100%;gap:2px}
-.nav-tab{padding:0 18px;height:100%;display:flex;align-items:center;font-size:14px;color:var(--text2);cursor:pointer;border-bottom:2.5px solid transparent;transition:.15s;user-select:none;white-space:nowrap}
-.nav-tab:hover{color:var(--text);background:var(--surface2)}
-.nav-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+.nav-title{font-size:14px;color:var(--text);font-weight:500}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .online-label{font-size:12px;color:var(--green);font-weight:500}
 
 /* ── Sections ── */
-.section{display:none;padding:16px;max-width:500px;margin:0 auto}
-.section.active{display:block}
+.section{padding:16px;max-width:500px;margin:0 auto}
 
 /* ── Cards ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
@@ -99,7 +95,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .cal-today-btn:hover{background:var(--surface2)}
 
 /* ── Chart ── */
-.chart-wrap{height:110px;margin-bottom:6px}
+.chart-wrap{height:180px;margin-bottom:6px}
 .xlabels{display:flex;justify-content:space-between}
 .xl{font-size:10px;color:var(--text3)}
 
@@ -125,22 +121,12 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .sname{font-size:13px;flex:1}
 .scm{font-size:13px;font-weight:500;font-family:'IBM Plex Mono',monospace}
 
-/* ── Route ── */
-.route-inputs{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-.place-row{display:flex;align-items:center;gap:8px}
-select{flex:1;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-family:'Sarabun',sans-serif;font-size:13px;color:var(--text)}
+/* ── Select ── */
+select{padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-family:'Sarabun',sans-serif;font-size:13px;color:var(--text)}
 select:focus{outline:none;border-color:var(--blue)}
-.plan-btn{width:100%;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--blue);color:#fff;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:500;cursor:pointer}
-.plan-btn:hover{background:var(--blue-d)}
-.route-card{border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:7px;border:1px solid transparent}
-.route-card.safe{background:var(--green-l);border-color:#86efac}
-.route-card.warn{background:var(--amber-l);border-color:#fcd34d}
-.route-card.danger{background:var(--red-l);border-color:#fca5a5}
-.route-head{font-size:13px;font-weight:500;margin-bottom:3px}
-.route-detail{font-size:12px;color:var(--text2)}
-.route-rec{font-size:12px;font-weight:500;margin-top:4px}
+
+/* ── Legend ── */
 .legend-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.legend-line{width:26px;height:4px;border-radius:2px;flex-shrink:0}
 .legend-text{font-size:12px;color:var(--text2)}
 
 /* ── Misc ── */
@@ -155,10 +141,7 @@ select:focus{outline:none;border-color:var(--blue)}
 <!-- ── Top Nav ── -->
 <nav class="topnav">
   <span class="nav-brand">FLOOD.IO</span>
-  <div class="nav-tabs">
-    <div class="nav-tab active" onclick="switchTab('data')">ข้อมูลระดับน้ำ</div>
-    <div class="nav-tab" onclick="switchTab('map')">แผนที่ & เส้นทาง</div>
-  </div>
+  <span class="nav-title">ข้อมูลระดับน้ำ</span>
   <div class="nav-right">
     <div class="pulse"></div>
     <span class="online-label">Live</span>
@@ -251,7 +234,7 @@ select:focus{outline:none;border-color:var(--blue)}
 
 </div>
 
-<!-- ══════════════ SECTION 2: MAP ══════════════ -->
+<!-- ══════════════ แผนที่สถานี (ล่างสุด) ══════════════ -->
 <div class="section" id="sec-map">
 
   <div id="map"></div>
@@ -262,53 +245,12 @@ select:focus{outline:none;border-color:var(--blue)}
     <div id="sensor-list"></div>
   </div>
 
-  <!-- Route planner -->
-  <div class="card">
-    <div class="card-title">วางเส้นทางหลีกเลี่ยงน้ำท่วม</div>
-    <div class="route-inputs">
-      <div class="place-row">
-        <div class="dot" style="background:var(--blue)"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;gap:6px">
-            <button id="btn-gps" onclick="setFromMode('gps')" style="flex:1;padding:5px 8px;border-radius:var(--radius-sm);border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:12px;cursor:pointer;font-family:'Sarabun',sans-serif">ตำแหน่งของฉัน</button>
-            <button id="btn-manual" onclick="setFromMode('manual')" style="flex:1;padding:5px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:none;color:var(--text2);font-size:12px;cursor:pointer;font-family:'Sarabun',sans-serif">เลือกสถานที่</button>
-          </div>
-          <div id="from-gps-row">
-            <div style="display:flex;gap:6px;align-items:center">
-              <div style="flex:1;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);font-size:13px;color:var(--text2)" id="from-label">กำลังระบุตำแหน่ง...</div>
-              <button onclick="getGPS()" style="padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:none;font-size:12px;cursor:pointer;color:var(--blue);white-space:nowrap;font-family:'Sarabun',sans-serif">↻ GPS</button>
-            </div>
-          </div>
-          <div id="from-manual-row" style="display:none;position:relative">
-            <input id="from-input" type="text" placeholder="พิมพ์ชื่อสถานที่..." autocomplete="off"
-              oninput="searchPlace('from',this.value)"
-              style="width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);font-family:'Sarabun',sans-serif;font-size:13px;background:var(--surface);color:var(--text)">
-            <div id="from-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:2px;z-index:9999;max-height:200px;overflow-y:auto"></div>
-          </div>
-        </div>
-      </div>
-      <div class="place-row">
-        <div class="dot" style="background:var(--red)"></div>
-        <div style="flex:1;position:relative">
-          <input id="to-input" type="text" placeholder="พิมพ์ชื่อสถานที่..." autocomplete="off"
-            oninput="searchPlace('to',this.value)"
-            style="width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);font-family:'Sarabun',sans-serif;font-size:13px;background:var(--surface);color:var(--text)">
-          <div id="to-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:2px;z-index:9999;max-height:200px;overflow-y:auto"></div>
-        </div>
-      </div>
-    </div>
-    <button class="plan-btn" onclick="planRoute()">วิเคราะห์เส้นทาง</button>
-    <div id="route-result"></div>
-  </div>
-
   <!-- Legend -->
   <div class="card">
     <div class="card-title">คำอธิบายสัญลักษณ์</div>
     <div class="legend-row"><div class="dot" style="background:var(--green)"></div><span class="legend-text">ปกติ — ต่ำกว่า Level 1</span></div>
     <div class="legend-row"><div class="dot" style="background:var(--amber)"></div><span class="legend-text">เฝ้าระวัง — Level 1–2</span></div>
     <div class="legend-row"><div class="dot" style="background:var(--red)"></div><span class="legend-text">อันตราย — Level 3 ขึ้นไป</span></div>
-    <div class="legend-row"><div class="legend-line" style="background:var(--blue)"></div><span class="legend-text">เส้นทางปลอดภัย</span></div>
-    <div class="legend-row"><div class="legend-line" style="background:var(--red);border-top:3px dashed var(--red)"></div><span class="legend-text">เส้นทางเสี่ยง / มีน้ำท่วม</span></div>
   </div>
 
 </div>
@@ -354,13 +296,7 @@ function updateLevels(idx){
 }
 
 /* ══ TAB ══ */
-function switchTab(tab){
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById('sec-'+tab).classList.add('active');
-  if(tab==='map') initMap();
-}
+// ไม่มี tabs แล้ว — แสดงทั้งหมดในหน้าเดียว
 
 /* ══════════════ SECTION 1: DATA ══════════════ */
 let dayOffset=0, stationIdx=0, showRows=6, myChart=null;
@@ -516,7 +452,7 @@ async function loadAndRender(){
   // ถ้าไม่มีข้อมูล
   if(!history.length){
     document.getElementById('hero-val').textContent=isToday?s.level.toFixed(1):'—';
-    document.getElementById('hero-sub').textContent=isToday?`อัปเดต ${s.last_update||'—'} · แบต ${s.battery||0}%`:'ไม่มีข้อมูล';
+    document.getElementById('hero-sub').textContent=isToday?`อัปเดต ${s.last_update||'—'}`:'ไม่มีข้อมูล';
     document.getElementById('hero-badge').textContent=isToday?lvBadge(s.level)[1]:'—';
     document.getElementById('m-max').textContent='—';
     document.getElementById('m-min').textContent='—';
@@ -538,7 +474,7 @@ async function loadAndRender(){
   document.getElementById('hero-site').textContent=`${s.name} · ID ${s.id}`;
   document.getElementById('hero-val').textContent=curV.toFixed(1);
   document.getElementById('hero-sub').textContent=isToday
-    ?`อัปเดต ${s.last_update||'—'} · แบต ${s.battery||0}%`
+    ?`อัปเดต ${s.last_update||'—'}`
     :`ข้อมูลวันที่ ${dateStr} · ${history.length} รายการ`;
   document.getElementById('hero-badge').textContent=bdgText;
 
@@ -639,12 +575,11 @@ function renderRaw(history){
         const lv  = r.flood_level;
         const dot = lv>=3?'#dc2626':lv>=1?'#d97706':'#16a34a';
         const lvTxt = lv>0 ? `<span style="font-size:11px;font-weight:500;color:${dot}">Lv.${lv}</span>` : '';
-        const bat = r.battery>0 ? `<span style="font-size:11px;color:var(--text3)">${r.battery}%</span>` : '';
         return `<div class="row" style="gap:8px">
           <span class="rtime">${r.time.slice(0,8)}</span>
           <span class="rval" style="color:${lv>=3?'#dc2626':lv>=1?'#d97706':'var(--text)'}">${r.water_level.toFixed(1)} cm</span>
           <span style="flex:1"></span>
-          ${bat}${lvTxt}
+          ${lvTxt}
         </div>`;
       }).join('');
 }
@@ -653,45 +588,8 @@ function showLoading(on){
   document.getElementById('hero-val').textContent = on ? '...' : document.getElementById('hero-val').textContent;
 }
 
-/* ══════════════ SECTION 2: MAP ══════════════ */
-let leafMap=null, markerRefs={}, routeLines=[];
-let userLat=null, userLng=null, userMarker=null;
-let fromMode='gps';
-
-function setFromMode(mode){
-  fromMode=mode;
-  document.getElementById('from-gps-row').style.display=mode==='gps'?'block':'none';
-  document.getElementById('from-manual-row').style.display=mode==='manual'?'block':'none';
-  document.getElementById('btn-gps').style.background=mode==='gps'?'var(--blue)':'none';
-  document.getElementById('btn-gps').style.color=mode==='gps'?'#fff':'var(--text2)';
-  document.getElementById('btn-gps').style.borderColor=mode==='gps'?'var(--blue)':'var(--border)';
-  document.getElementById('btn-manual').style.background=mode==='manual'?'var(--blue)':'none';
-  document.getElementById('btn-manual').style.color=mode==='manual'?'#fff':'var(--text2)';
-  document.getElementById('btn-manual').style.borderColor=mode==='manual'?'var(--blue)':'var(--border)';
-}
-
-function getGPS(){
-  const lbl=document.getElementById('from-label');
-  lbl.textContent='กำลังระบุตำแหน่ง...';
-  lbl.style.color='var(--text2)';
-  if(!navigator.geolocation){ lbl.textContent='เบราว์เซอร์ไม่รองรับ GPS'; return; }
-  navigator.geolocation.getCurrentPosition(pos=>{
-    userLat=pos.coords.latitude;
-    userLng=pos.coords.longitude;
-    lbl.textContent='ตำแหน่งของคุณ ('+userLat.toFixed(4)+', '+userLng.toFixed(4)+')';
-    lbl.style.color='var(--text)';
-    if(leafMap){
-      if(userMarker) leafMap.removeLayer(userMarker);
-      const icon=L.divIcon({html:'<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
-      userMarker=L.marker([userLat,userLng],{icon}).addTo(leafMap).bindPopup('ตำแหน่งของคุณ');
-      leafMap.flyTo([userLat,userLng],14,{duration:.8});
-    }
-  }, err=>{
-    if(err.code===1) lbl.textContent='ไม่อนุญาตให้เข้าถึง GPS — กรุณาอนุญาตในเบราว์เซอร์';
-    else lbl.textContent='ไม่สามารถระบุตำแหน่งได้';
-    lbl.style.color='var(--red)';
-  });
-}
+/* ══════════════ แผนที่สถานี ══════════════ */
+let leafMap=null, markerRefs={};
 
 function initMap(){
   if(leafMap) return;
@@ -710,7 +608,7 @@ function initMap(){
     const icon=L.divIcon({html:'<div style="width:20px;height:20px;border-radius:50%;background:'+col+';border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>',className:'',iconSize:[20,20],iconAnchor:[10,10]});
     const m=L.marker([s.lat,s.lng],{icon}).addTo(leafMap);
     const [,bt]=lvBadge(s.level);
-    m.bindPopup('<b style="font-size:13px">'+s.name+'</b><br><span style="font-size:12px">ระดับน้ำ: <b>'+s.level.toFixed(1)+' cm</b><br>สถานะ: '+bt+' · แบต '+s.battery+'%</span>');
+    m.bindPopup('<b style="font-size:13px">'+s.name+'</b><br><span style="font-size:12px">ระดับน้ำ: <b>'+s.level.toFixed(1)+' cm</b><br>สถานะ: '+bt+'</span>');
     markerRefs[s.id]=m;
   });
 
@@ -719,251 +617,17 @@ function initMap(){
     return '<div class="sensor-row" onclick="flyTo('+s.id+')"><div class="dot" style="background:'+lvColor(s.level)+'"></div><span class="sname">'+s.name+'</span><span class="scm">'+s.level.toFixed(1)+' cm</span><span class="badge badge-'+bc+'">'+bt+'</span></div>';
   }).join('');
 
-  const ALL=[...SENSORS.map(s=>({name:s.name,lat:s.lat,lng:s.lng}))];
-  window._ALL_PLACES=ALL;
-
   // ถ้ามีสถานีจริง ให้ zoom ไปที่สถานีแรก
   if(SENSORS.length){
     const s0=SENSORS[0];
-    if(s0.lat && s0.lng) leafMap.setView([s0.lat,s0.lng],14);
+    if(s0.lat && s0.lng) leafMap.setView([s0.lat,s0.lng],13);
   }
-  getGPS();
 }
 
 function flyTo(id){
   const s=SENSORS.find(x=>x.id===id);
   leafMap.flyTo([s.lat,s.lng],15,{duration:.8});
   markerRefs[id].openPopup();
-}
-
-
-/* ── Autocomplete ── */
-let searchTimers={from:null,to:null};
-let selectedPlaces={from:null,to:null};
-
-/* ── พจนานุกรมชื่อย่อ/ชื่อเล่น ของสถานที่ในไทย ── */
-const PLACE_ALIASES = {
-  // มหาวิทยาลัย
-  'มหานคร':'Mahanakorn University of Technology Bangkok',
-  'มทม':'Mahanakorn University of Technology Bangkok',
-  'มอมหานคร':'Mahanakorn University of Technology Bangkok',
-  'มหาลัยมหานคร':'Mahanakorn University of Technology Bangkok',
-  'จุฬา':'Chulalongkorn University Bangkok',
-  'มจุฬา':'Chulalongkorn University Bangkok',
-  'ธรรมศาสตร์':'Thammasat University',
-  'มธ':'Thammasat University',
-  'เกษตร':'Kasetsart University Bangkok',
-  'มก':'Kasetsart University Bangkok',
-  'มหิดล':'Mahidol University',
-  'ลาดกระบัง':'King Mongkut Institute Ladkrabang',
-  'สจล':'King Mongkut Institute Ladkrabang',
-  'บางมด':'King Mongkut University Technology Thonburi',
-  'กม':'King Mongkut University Technology Thonburi',
-  'มน':'Naresuan University',
-  'มช':'Chiang Mai University',
-  'มข':'Khon Kaen University',
-  'ม.อ':'Prince of Songkla University',
-  // สถานที่ทั่วไป
-  'สนามบินสุวรรณภูมิ':'Suvarnabhumi Airport',
-  'สุวรรณภูมิ':'Suvarnabhumi Airport',
-  'ดอนเมือง':'Don Mueang Airport Bangkok',
-  'สนามบินดอนเมือง':'Don Mueang Airport',
-  'หมอชิต':'Mo Chit BTS Bangkok',
-  'อนุสาวรีย์':'Victory Monument Bangkok',
-  'อนุสาวรีย์ชัย':'Victory Monument Bangkok',
-  'สยาม':'Siam Square Bangkok',
-  'เซ็นทรัลลาดพร้าว':'Central Ladprao Bangkok',
-  'เมกา':'Mega Bangna',
-};
-
-function expandQuery(q){
-  const trimmed = q.trim();
-  // หาใน alias map (จากยาวไปสั้น เพื่อ match ที่ดีกว่าก่อน)
-  const keys = Object.keys(PLACE_ALIASES).sort((a,b)=>b.length-a.length);
-  for(const k of keys){
-    if(trimmed.includes(k) || k.includes(trimmed)){
-      return PLACE_ALIASES[k];
-    }
-  }
-  return null;
-}
-
-function searchPlace(field,q){
-  selectedPlaces[field]=null;
-  const box=document.getElementById(field+'-suggestions');
-  if(q.length<1){ box.style.display='none'; return; }
-  clearTimeout(searchTimers[field]);
-
-  // แสดงสถานีของเราก่อนเลยถ้าพิมพ์ตรงกัน
-  const sensorMatches = SENSORS.filter(s=>s.name.includes(q)||q.includes(s.name.slice(0,3)));
-  let sensorHtml = sensorMatches.map(s=>`
-    <div onclick="selectPlace('${field}',${s.lat},${s.lng},'${s.name}')"
-      style="padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);
-             display:flex;align-items:center;gap:8px;color:var(--text)"
-      onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-      <div style="width:8px;height:8px;border-radius:50%;background:${lvColor(s.level)};flex-shrink:0"></div>
-      <span>${s.name}</span>
-      <span style="font-size:11px;color:var(--text3);margin-left:auto">สถานีของเรา</span>
-    </div>`).join('');
-
-  if(q.length<2){
-    // ถ้าพิมพ์แค่ตัวเดียว แสดงเฉพาะสถานีของเรา
-    box.innerHTML = sensorHtml || '<div style="padding:10px 12px;font-size:12px;color:var(--text3)">พิมพ์ชื่อสถานที่...</div>';
-    box.style.display='block';
-    return;
-  }
-
-  box.innerHTML = sensorHtml + '<div style="padding:8px 12px;font-size:11px;color:var(--text3)">กำลังค้นหา...</div>';
-  box.style.display='block';
-
-  searchTimers[field]=setTimeout(async()=>{
-    try{
-      // ตรวจว่ามีชื่อย่อหรือไม่ ถ้ามีใช้ชื่อเต็มแทน
-      const expanded = expandQuery(q);
-      const queries = expanded ? [expanded, q] : [q];
-
-      async function nomSearch(query){
-        const url='https://nominatim.openstreetmap.org/search?format=json'
-          +'&q='+encodeURIComponent(query)
-          +'&countrycodes=th'
-          +'&viewbox=97.3,5.5,105.7,20.5&bounded=1'
-          +'&limit=5';
-        const res=await fetch(url,{headers:{'Accept-Language':'th,en'}});
-        return res.json();
-      }
-
-      // ค้นหาพร้อมกันทั้งชื่อย่อและชื่อเต็ม
-      const results = await Promise.all(queries.map(nomSearch));
-      // รวมและ dedup ด้วย place_id
-      const seen = new Set();
-      const combined = results.flat().filter(p=>{
-        if(seen.has(p.place_id)) return false;
-        seen.add(p.place_id); return true;
-      }).slice(0,6);
-
-      const placeHtml = combined.length===0
-        ? '<div style="padding:10px 12px;font-size:12px;color:var(--text3)">ไม่พบสถานที่</div>'
-        : combined.map(p=>{
-            const parts = p.display_name.split(', ');
-            const shortName = parts.slice(0, Math.min(3, parts.length)).join(', ');
-            const safe = shortName.replace(/'/g,'\x27');
-            return `<div onclick="selectPlace('${field}',${p.lat},${p.lon},'${safe}')"
-              style="padding:9px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text)"
-              onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-              ${shortName}
-            </div>`;
-          }).join('');
-      box.innerHTML = sensorHtml + placeHtml;
-    } catch(e){
-      box.innerHTML = sensorHtml + '<div style="padding:10px 12px;font-size:12px;color:var(--red)">เชื่อมต่อไม่ได้</div>';
-    }
-  },350);
-}
-
-function selectPlace(field,lat,lng,name){
-  selectedPlaces[field]={lat:parseFloat(lat),lng:parseFloat(lng),name};
-  document.getElementById(field+'-input').value=name;
-  document.getElementById(field+'-suggestions').style.display='none';
-  if(leafMap) leafMap.flyTo([lat,lng],15,{duration:.6});
-}
-
-document.addEventListener('click',e=>{
-  ['from','to'].forEach(f=>{
-    const box=document.getElementById(f+'-suggestions');
-    if(box && !box.contains(e.target) && e.target.id!==f+'-input') box.style.display='none';
-  });
-});
-
-async function planRoute(){
-  let from;
-  if(fromMode==='gps'){
-    if(!userLat){ alert('กรุณาอนุญาต GPS ก่อน แล้วกด ↻ GPS'); return; }
-    from={lat:userLat,lng:userLng,name:'ตำแหน่งของคุณ'};
-  } else {
-    if(!selectedPlaces.from){ alert('กรุณาพิมพ์และเลือกจุดเริ่มต้น'); return; }
-    from=selectedPlaces.from;
-  }
-  if(!selectedPlaces.to){ alert('กรุณาพิมพ์และเลือกปลายทาง'); return; }
-  const to=selectedPlaces.to;
-
-  routeLines.forEach(l=>leafMap.removeLayer(l)); routeLines=[];
-  document.getElementById('route-result').innerHTML='<div style="padding:12px 0;font-size:13px;color:var(--text3)">กำลังคำนวณเส้นทาง...</div>';
-
-  function nearSensors(coords){
-    return SENSORS.filter(s=>{
-      const onRoute = coords.some(c=>Math.sqrt(Math.pow(c[1]-s.lat,2)+Math.pow(c[0]-s.lng,2))<0.008);
-      return onRoute;
-    });
-  }
-
-  // ดึงเส้นทางจาก OSRM (ตามถนนจริง)
-  async function fetchRoute(fromLat,fromLng,toLat,toLng){
-    try{
-      const url=`https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
-      const res=await fetch(url);
-      const data=await res.json();
-      if(data.routes&&data.routes[0]){
-        const coords=data.routes[0].geometry.coordinates; // [lng,lat]
-        const dist=(data.routes[0].distance/1000).toFixed(1);
-        const dur=Math.round(data.routes[0].duration/60);
-        return {coords,dist,dur};
-      }
-    }catch(e){}
-    return null;
-  }
-
-  const mainRoute = await fetchRoute(from.lat,from.lng,to.lat,to.lng);
-
-  if(!mainRoute){
-    document.getElementById('route-result').innerHTML='<div style="padding:12px 0;font-size:13px;color:var(--red)">ไม่สามารถคำนวณเส้นทางได้ กรุณาลองใหม่</div>';
-    return;
-  }
-
-  // วาดเส้นทาง
-  const mainCoords = mainRoute.coords.map(c=>[c[1],c[0]]); // leaflet ใช้ [lat,lng]
-  const nearMain   = nearSensors(mainRoute.coords);
-  const maxLvMain  = nearMain.length?Math.max(...nearMain.map(s=>floodLv(s.level))):0;
-  const riskMain   = maxLvMain>=3?'danger':maxLvMain>=1?'warn':'safe';
-  const colMain    = riskMain==='danger'?'#dc2626':riskMain==='warn'?'#d97706':'#2563eb';
-
-  const line = L.polyline(mainCoords,{color:colMain,weight:5,opacity:.85,dashArray:riskMain==='danger'?'8 6':null}).addTo(leafMap);
-  routeLines.push(line);
-  const b = line.getBounds();
-  // ตรวจสอบว่า bounds อยู่ในประเทศไทย ถ้าไม่อย่า fitBounds
-  if(b.isValid() && b.getNorth()<21 && b.getSouth()>5 && b.getEast()<106 && b.getWest()>97){
-    leafMap.fitBounds(b.pad(.15));
-  } else {
-    leafMap.setView([from.lat,from.lng],13);
-  }
-
-  // ปุ่ม Google Maps — ส่งพิกัดจริง (แม่นยำกว่าชื่อสถานที่)
-  // GPS mode → ปล่อย origin ว่างไว้ Google Maps จะใช้ตำแหน่งปัจจุบันเอง
-  const fromGM = fromMode==='gps' ? '' : encodeURIComponent(from.name);
-  const toGM   = encodeURIComponent(to.name);
-  const gmUrl  = `https://www.google.com/maps/dir/${fromGM}/${toGM}`;
-
-  const affected = nearMain.filter(s=>floodLv(s.level)>0).map(s=>s.name);
-  let detail = `${mainRoute.dist} กม. · ประมาณ ${mainRoute.dur} นาที`;
-  if(affected.length) detail += ` · ใกล้: ${affected.slice(0,2).join(', ')}`;
-
-  const recTxt = riskMain==='danger'
-    ?'<div class="route-rec" style="color:#991b1b">ไม่แนะนำ — มีน้ำท่วมสูงบนเส้นทาง</div>'
-    :riskMain==='warn'
-    ?'<div class="route-rec" style="color:#92400e">ควรระวัง — มีสถานีเฝ้าระวังใกล้เส้นทาง</div>'
-    :'<div class="route-rec" style="color:#15803d">✓ ปลอดภัย — ไม่พบน้ำท่วมบนเส้นทาง</div>';
-
-  document.getElementById('route-result').innerHTML=
-    '<div style="margin-top:12px;margin-bottom:8px;font-size:13px;font-weight:500;color:var(--text2)">ผลการวิเคราะห์</div>'+
-    `<div class="route-card ${riskMain}">
-      <div class="route-head">${from.name} → ${to.name}</div>
-      <div class="route-detail">${detail}</div>
-      ${recTxt}
-      <button onclick="window.open('${gmUrl}','_blank')"
-        style="margin-top:8px;width:100%;padding:8px;border-radius:var(--radius-sm);border:none;
-        background:${colMain};color:#fff;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;cursor:pointer">
-        นำทางด้วย Google Maps →
-      </button>
-    </div>`;
 }
 
 
@@ -1059,6 +723,8 @@ async function initDashboard(){
   renderCalGrid();
   // โหลดกราฟรายเดือนหลังจาก main data โหลดเสร็จแล้ว
   setTimeout(loadMonthlyChart, 800);
+  // สร้างแผนที่หลังจาก SENSORS โหลดเสร็จ
+  if(SENSORS.length) initMap();
 
   // รีเฟรชข้อมูลสถานีทุก 10 นาที
   setInterval(async()=>{
